@@ -13,6 +13,7 @@ class Encoder(nn.Module):
     Encoder network containing enrolled LSTM/GRU
 
     :param number_of_features: number of input features
+    
     :param hidden_size: hidden size of the RNN
     :param hidden_layer_depth: number of layers in RNN
     :param latent_length: latent vector length

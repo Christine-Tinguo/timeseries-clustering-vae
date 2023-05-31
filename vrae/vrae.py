@@ -249,7 +249,15 @@ class VRAE(BaseEstimator, nn.Module):
         :param x:input tensor
         :return: the decoded output, latent vector
         """
-        cell_output = self.encoder(x)
+        # addition of attack adverisal
+        delta=attack_features(x,model,args.steps,args.epsFeat,train_pos_edge_index,args.norm)
+        x1=x+delta
+        
+        # addition of normalization
+        
+        
+        #cell_output = self.encoder(x)
+        cell_output = self.encoder(x1)
         latent = self.lmbd(cell_output)
         x_decoded = self.decoder(latent)
 

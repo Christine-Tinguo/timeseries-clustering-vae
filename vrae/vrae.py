@@ -244,7 +244,7 @@ class VRAE(BaseEstimator, nn.Module):
     
     
 #     def attack_features(x,model,n_iters,epsilon,loss_fn,norm='linf',variational=False):
-    def attack_features(x,n_iters,epsilon,train_pos_edge_index,norm='linf',variational=False):
+    def attack_features(x,n_iters,epsilon,loss_fn,norm='linf',variational=False):
         delta=torch.zeros_like(x).requires_grad_()
         length=torch.norm(x,dim=1,p=2,keepdim=True)
         print("====attack_features===delta.shape:",delta.shape)

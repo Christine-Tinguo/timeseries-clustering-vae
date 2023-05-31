@@ -281,11 +281,11 @@ class VRAE(BaseEstimator, nn.Module):
         :return: the decoded output, latent vector
         """
         # addition of attack adverisal
-        #args.steps
-        #args.epsFeat
-        #args.norm
-        delta=attack_features(x,1,5e-1,self.loss_fn,'l2')
-        x1=x+delta
+        # args.steps
+        # args.epsFeat
+        # args.norm
+        delta = self.attack_features(x,1,5e-1,self.loss_fn,'l2')
+        x1 = x+delta
         
         # addition of normalization
         

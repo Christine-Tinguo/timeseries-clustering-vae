@@ -241,6 +241,37 @@ class VRAE(BaseEstimator, nn.Module):
                 n_epochs=self.n_epochs,
                 batch_size=self.batch_size,
                 cuda=self.use_cuda)
+    
+    
+#     def attack_features(x,model,n_iters,epsilon,loss_fn,norm='linf',variational=False):
+    def attack_features(x,n_iters,epsilon,train_pos_edge_index,norm='linf',variational=False):
+        delta=torch.zeros_like(x).requires_grad_()
+        length=torch.norm(x,dim=1,p=2,keepdim=True)
+        print("====attack_features===delta.shape:",delta.shape)
+        print("====attack_features===x.shape:",x.shape)
+        if norm =="linf":
+            alpha=epsilon/n_iters  #it controls the total perturbations after n_iters steps is less than epsilon
+        elif norm=="l2":
+            max_norm=length*epsilon
+            alpha=max_norm/n_iters  #it controls the norm of  total perturbations after n_iters steps is less than epsilon*||X||_2
+        for i in range(n_iters):
+#             z = model.encode(x+delta, train_pos_edge_index)
+#             train_pos_edge_index how to deal it
+            z = self.encoder(x+delta)
+#             loss = model.recon_loss(z, train_pos_edge_index)
+            loss = loss_fn(z, x)
+            if variational:
+                loss=loss+(1.0/z.shape[0])*model.kl_loss()
+            if norm=='linf': 
+                grad=torch.autograd.grad(loss,delta)[0].sign()
+            elif norm=='l2':
+                grad=torch.autograd.grad(loss,delta)[0]
+                length_grad=torch.norm(grad.detach(),dim=1,p=2,keepdim=True)
+                grad=grad*length/(length_grad+1e-20)
+            else:
+                print("Wrong in Norm!")
+            delta.data=delta.data+grad.data*alpha
+        return delta
 
     def forward(self, x):
         """
@@ -250,7 +281,10 @@ class VRAE(BaseEstimator, nn.Module):
         :return: the decoded output, latent vector
         """
         # addition of attack adverisal
-        delta=attack_features(x,model,args.steps,args.epsFeat,train_pos_edge_index,args.norm)
+        #args.steps
+        #args.epsFeat
+        #args.norm
+        delta=attack_features(x,1,5e-1,self.loss_fn,'l2')
         x1=x+delta
         
         # addition of normalization
